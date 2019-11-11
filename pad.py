@@ -1,12 +1,38 @@
 from tkinter import *
 from tkinter import ttk
 from socket import *
+import picamera
+import os
 
 global clientSock
+global camera
+
+def get_Fsize(fname):
+    fileSize = os.path.getsize("./" + fname)
+    return str(fileSize)
+
+def getFData(fname):
+    data = b""
+    with open("./" + fname, "rb") as f:
+        for  line in f:     
+            data += line
+
+    return data
 
 def button_pressed(value):
     number_entry.insert("end",value)
     clientSock.send(str(value).encode())
+    for i in range(1, 6):
+        fname = str(i) + ".jpg"
+        camera.capture(fname)
+
+        #send filesize
+        clientSock.send(get_Fsize(fname).encode())
+
+        clientSock.sendall(getFData(fname))
+        
+        #clientSock.recv(1)
+    
     print(value,"pressed")
      
 def star_button_pressed(value):
@@ -27,16 +53,19 @@ def recvall(sock, count):
     return buf
 
 
-address = 'localhost'
+address = '192.168.43.126'
 port = 8080
 
 clientSock = socket(AF_INET, SOCK_STREAM)
 clientSock.connect((address, port))
 
+camera = picamera.PiCamera()
+
 root = Tk()
 w, h = root.winfo_screenwidth(), root.winfo_screenheight()
 root.overrideredirect(1)
-root.geometry("%dx%d+0+0" % (w, h))
+#root.geometry("%dx%d+0+0" % (w, h))
+root.geometry("800x640")
  
 entry_value = StringVar(root, value='')
  
