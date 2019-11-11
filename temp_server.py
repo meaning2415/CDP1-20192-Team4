@@ -38,10 +38,11 @@ def run_openpose(opWrapper):
     # Construct it from system arguments
     # op.init_argv(args[1])
     # oppython = op.OpenposePython()
-    for i in range(1, 6):
-        image_path = "./" + str(i)
-        for j in range(1, 6):
-            frame = cv2.imread(image_path + "/" + str(j))
+    for i in range(1, 7):
+        image_path = str(i)
+        for j in range(1, 7):
+
+            frame = cv2.imread(image_path +"\\" + str(j) + ".jpg")
             height, width, channels = frame.shape
 
             # Create new datum
@@ -53,6 +54,7 @@ def run_openpose(opWrapper):
             opWrapper.emplaceAndPop([datum])
 
             dataset.append(datum.handKeypoints[1])
+            print(dataset)
 
     return dataset
 
@@ -64,8 +66,6 @@ def recvall(sock, count):
         buf += newbuf
         count -= len(newbuf)
     return buf
-
-
 
 
 def data_receive(clientSock, addr):
