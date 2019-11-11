@@ -32,26 +32,14 @@ def make_rect(height, width):
         return handRectangles
 
 
-def run_openpose(opWrapper, addr, data):
+def run_openpose(opWrapper, addr, image_path):
 
 
     # Construct it from system arguments
     # op.init_argv(args[1])
     # oppython = op.OpenposePython()
-
-    frame = data
-
+    frame = cv2.imread(image_path)
     height, width, channels = frame.shape
-
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-
-    video = cv2.VideoWriter(str(addr) + ".avi", fourcc, 30.0, (width, height))
-    out_file = open(str(addr) + ".txt", "a")
-
-    #cv2.imshow("VideoFrame", frame)
-
-    # Read image and face rectangle locations
-    #imageToProcess = cv2.imread(args[0].image_path)
 
     # Create new datum
     datum = op.Datum()
@@ -61,13 +49,10 @@ def run_openpose(opWrapper, addr, data):
     # Process and display image
     opWrapper.emplaceAndPop([datum])
 
-    out_file.write(str(datum.handKeypoints[1]))
+    print(str(datum.handKeypoints[1]))
 
     #cv2.imshow("OpenPose 1.5.1 - Tutorial Python API", datum.cvOutputData) #show image
 
-    video.write(datum.cvOutputData)
-
-    out_file.close()
 
 
     return datum.cvOutputData, datum.handKeypoints[1]
@@ -88,15 +73,18 @@ def data_receive(clientSock, addr):
     print(str(addr) + "connected!")
     command = ''
     pwd = ""
+
+    #패드를 누를때마다 수신
     while True:
             command = clientSock.recv(1).decode()
-            if(command == "*")
+            if(command == "*"):
                 break
             pwd += command
             print(pwd)
 
             for i in range(1, 6):
-                f = open(str(i) + ".jpg", "wb")
+                fname = str(len(pwd)) + "\\" + str(i) + ".jpg"
+                f = open(fname, "wb")
                 file_size = clientSock.recv(20).decode()
                 print(file_size)
                 hand_data = recvall(clientSock,int(file_size))
@@ -107,6 +95,9 @@ def data_receive(clientSock, addr):
 
     print("out")
     clientSock.send("1".encode())
+
+
+
 
     '''
     #openpose dir
