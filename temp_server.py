@@ -68,7 +68,7 @@ def run_openpose(opWrapper, addr, data):
     video.write(datum.cvOutputData)
 
     out_file.close()
-    
+
 
     return datum.cvOutputData, datum.handKeypoints[1]
 
@@ -77,7 +77,6 @@ def recvall(sock, count):
     buf = b''
     while count:
         newbuf = sock.recv(count)
-        
         buf += newbuf
         count -= len(newbuf)
     return buf
@@ -86,12 +85,25 @@ def recvall(sock, count):
 
 
 def data_receive(clientSock, addr):
+    print(str(addr) + "connected!")
     command = ''
     pwd = ""
-    while command != "*":
+    while True:
             command = clientSock.recv(1).decode()
+            if(command == "*")
+                break
             pwd += command
             print(pwd)
+
+            for i in range(1, 6):
+                f = open(str(i) + ".jpg", "wb")
+                file_size = clientSock.recv(20).decode()
+                print(file_size)
+                hand_data = recvall(clientSock,int(file_size))
+                f.write(hand_data)
+                f.close()
+                #clientSock.send("1".encode())
+
 
     print("out")
     clientSock.send("1".encode())
@@ -121,7 +133,7 @@ def data_receive(clientSock, addr):
     frame = 0
 
     while True:
-        
+
         length = recvall(clientSock, 16)
         stringData = recvall(clientSock, int(length))
         data = numpy.fromstring(stringData, dtype = 'uint8')
@@ -131,10 +143,10 @@ def data_receive(clientSock, addr):
         print(str(frame) + "/" + str(frame_size))
 
         img_result, skeleton_result = run_openpose(opWrapper, addr, imageToProcess)
-        
+
         #cv2.imshow('result', img_result)
         #cv2.waitKey(0)
-        
+
         if(frame == frame_size):
             print('read end')
             break
@@ -144,15 +156,15 @@ def data_receive(clientSock, addr):
         #send img data
         data = numpy.array(img_result)
         stringData = data.tostring()
-        
+
         #String 형태로 변환한 이미지를 socket을 통해서 전송
         clientSock.sendall((str(len(stringData))).encode().ljust(16) + stringData)
         print('send')
         '''
 
-def run_server(host='127.0.0.1', port=8080):
+def run_server(host='192.168.43.126', port=8080):
     with socket(AF_INET, SOCK_STREAM) as serverSock:
-        serverSock.bind(('', 8080))
+        serverSock.bind((host, port))
         while True:
             serverSock.listen(5)
             clientSock, addr = serverSock.accept()
@@ -164,7 +176,7 @@ def run_server(host='127.0.0.1', port=8080):
 
 
 if __name__ == '__main__':
-
+    '''
     # Import Openpose (Windows/Ubuntu/OSX)
     dir_path="C:/Users/test/Desktop/openpose/build/examples/tutorial_api_python"
 
@@ -184,5 +196,5 @@ if __name__ == '__main__':
     except ImportError as e:
         print('Error: OpenPose library could not be found. Did you enable `BUILD_PYTHON` in CMake and have this Python script in the right folder?')
         raise e
-
+    '''
     run_server()
