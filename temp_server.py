@@ -32,30 +32,29 @@ def make_rect(height, width):
         return handRectangles
 
 
-def run_openpose(opWrapper, addr, image_path):
+def run_openpose(opWrapper):
 
-
+    dataset = []
     # Construct it from system arguments
     # op.init_argv(args[1])
     # oppython = op.OpenposePython()
-    frame = cv2.imread(image_path)
-    height, width, channels = frame.shape
+    for i in range(1, 6):
+        image_path = "./" + str(i)
+        for j in range(1, 6):
+            frame = cv2.imread(image_path + "/" + str(j))
+            height, width, channels = frame.shape
 
-    # Create new datum
-    datum = op.Datum()
-    datum.cvInputData = frame
-    datum.handRectangles = make_rect(height, width)
+            # Create new datum
+            datum = op.Datum()
+            datum.cvInputData = frame
+            datum.handRectangles = make_rect(height, width)
 
-    # Process and display image
-    opWrapper.emplaceAndPop([datum])
+            # Process and display image
+            opWrapper.emplaceAndPop([datum])
 
-    print(str(datum.handKeypoints[1]))
+            dataset.append(datum.handKeypoints[1])
 
-    #cv2.imshow("OpenPose 1.5.1 - Tutorial Python API", datum.cvOutputData) #show image
-
-
-
-    return datum.cvOutputData, datum.handKeypoints[1]
+    return dataset
 
 
 def recvall(sock, count):
@@ -93,13 +92,6 @@ def data_receive(clientSock, addr):
                 #clientSock.send("1".encode())
 
 
-    print("out")
-    clientSock.send("1".encode())
-
-
-
-
-    '''
     #openpose dir
     dir_path="C:/Users/test/Desktop/openpose/build/examples/tutorial_api_python"
 
@@ -115,43 +107,11 @@ def data_receive(clientSock, addr):
     opWrapper.configure(params)
     opWrapper.start()
 
-    frame_size = clientSock.recv(30).decode()
+    run_openpose(opWrapper)
 
-    frame_size = int(frame_size, 2)
+    print("out")
+    clientSock.send("1".encode())
 
-    print(frame_size)
-
-    frame = 0
-
-    while True:
-
-        length = recvall(clientSock, 16)
-        stringData = recvall(clientSock, int(length))
-        data = numpy.fromstring(stringData, dtype = 'uint8')
-
-        imageToProcess = cv2.imdecode(data, cv2.IMREAD_COLOR)
-
-        print(str(frame) + "/" + str(frame_size))
-
-        img_result, skeleton_result = run_openpose(opWrapper, addr, imageToProcess)
-
-        #cv2.imshow('result', img_result)
-        #cv2.waitKey(0)
-
-        if(frame == frame_size):
-            print('read end')
-            break
-
-        frame += 1
-
-        #send img data
-        data = numpy.array(img_result)
-        stringData = data.tostring()
-
-        #String 형태로 변환한 이미지를 socket을 통해서 전송
-        clientSock.sendall((str(len(stringData))).encode().ljust(16) + stringData)
-        print('send')
-        '''
 
 def run_server(host='192.168.43.126', port=8080):
     with socket(AF_INET, SOCK_STREAM) as serverSock:
