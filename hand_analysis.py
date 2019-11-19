@@ -69,7 +69,7 @@ def fread(flist):
             shape.append(np.array(hand))
         dataset.append(shape)
         f.close()
-
+    print(len(dataset))
     return dataset
 
 def mean_degree(dataset):
@@ -185,10 +185,22 @@ def compare_pos(std,A, STD_CONST):
 
 flist=["test1.txt","test2.txt","test3.txt"]
 dataset = fread(flist)
+print(len(dataset[1]))
 result = mean_ratio(dataset)
+
+std = open("std.txt", "w")
+A = open("A.txt", "w")
 
 dataset_A = fread(["compare1.txt"])
 result_a = mean_ratio(dataset_A)
+
+stdW = str(result).replace("[", "").replace("\n", "").replace("]", "\n")
+std.write(stdW)
+AW = str(result_a).replace("[", "").replace("\n", "").replace("]", "\n")
+A.write(AW)
+
+std.close()
+A.close()
 
 print(compare_A(result, result_a, 0.1))
 
